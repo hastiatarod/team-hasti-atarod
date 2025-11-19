@@ -65,10 +65,33 @@ pnpm dev
 
 </details>
 
-- next
-- git
-- docker
-- couchdb
+<details>
+  <summary>next</summary>
+
+- [setup-next](https://github.com/saeedhei/team-hasti-atarod/blob/main/docs/next/setup-next.md)
+
+</details>
+
+<details>
+  <summary>git</summary>
+
+- [pr](https://github.com/saeedhei/team-hasti-atarod/blob/main/docs/git/pr.md)
+
+</details>
+
+<details>
+  <summary>docker</summary>
+
+- [couchdb](https://github.com/saeedhei/team-hasti-atarod/blob/main/docs/docker/couchdb.md)
+
+</details>
+
+<details>
+  <summary>couchdb</summary>
+
+- [docker-run](https://github.com/saeedhei/team-hasti-atarod/blob/main/docs/couchdb/docker-run.md)
+
+</details>
 
 ## :handshake: Contribution Workflow (VERY IMPORTANT)
 

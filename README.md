@@ -1,6 +1,6 @@
-# Team Kanban Board
+# Kanban Board
 
-A collaborative Kanban board built with Next.js, TypeScript, Tailwind, and a modern API architecture (**REST** + `GraphQL` + tRPC).  
+A collaborative Kanban board built with **Next.js**, **TypeScript**, **Tailwind**, and a modern API architecture (**REST** + **GraphQL** + **tRPC**).  
 This tool helps teams manage tasks by columns, track workflow, and improve productivity.
 
 ## :sparkles: Features
@@ -26,12 +26,17 @@ This tool helps teams manage tasks by columns, track workflow, and improve produ
 
 ## :file_folder: Project Structure
 
-- /app → Main Next.js application (App Router)
-- /docs → Project documentation (setup files, guides)
-- /lib → Utilities, configurations, and shared functions
-- /public → Static assets (images, icons)
+- **/app** → Main Next.js application (App Router)
+- **/docs** → Project documentation (setup files, guides)
+- **/lib** → Utilities, configurations, and shared functions
+- **/public** → Static assets (images, icons)
 
 ## :rocket: Getting Started
+
+Open a terminal (Command Prompt or PowerShell for Windows, Terminal for macOS or Linux)
+
+Ensure Git is installed
+`Visit https://git-scm.com to download and install console Git if not already installed`
 
 Clone the repo:
 
@@ -66,6 +71,5 @@ pnpm dev
 ## :memo: Next.js Setup Docs
 
 All Next.js-related installation and setup notes are inside:
-docs/next/
 
-## :world_map: Roadmap
+` docs/next/`

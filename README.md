@@ -60,7 +60,7 @@ pnpm dev
 
 <details>
    <summary>pnpm</summary>
-   - [install] (https://github.com/saeedhei/team-hasti-atarod/blob/main/docs/pnpm/install.md)
+    - [install](https://github.com/saeedhei/team-hasti-atarod/blob/main/docs/pnpm/install.md)
 </details>
 
 - next

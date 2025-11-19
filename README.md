@@ -1,36 +1,75 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Kanban Board
 
-## Getting Started
+A collaborative Kanban board built with **Next.js**, **TypeScript**, **Tailwind**, and a modern API architecture (**REST** + **GraphQL** + **tRPC**).  
+This tool helps teams manage tasks by columns, track workflow, and improve productivity.
 
-First, run the development server:
+## :sparkles: Features
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- Create, edit, delete tasks
+- Drag & drop between columns
+- User authentication
+- Different board views
+- Dark/Light mode
+- Real-time updates (later)
+
+## :hammer_and_wrench: Tech Stack
+
+```
+- Next.js 16.0.3 (App Router)
+- TypeScript
+- TailwindCSS
+- Shadcn/UI
+- tRPC
+- REST API
+- GraphQL (Apollo)
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## :file_folder: Project Structure
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- **/app** → Main Next.js application (App Router)
+- **/docs** → Project documentation (setup files, guides)
+- **/lib** → Utilities, configurations, and shared functions
+- **/public** → Static assets (images, icons)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## :rocket: Getting Started
 
-## Learn More
+Open a terminal (Command Prompt or PowerShell for Windows, Terminal for macOS or Linux)
 
-To learn more about Next.js, take a look at the following resources:
+Ensure Git is installed
+`Visit https://git-scm.com to download and install console Git if not already installed`
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Clone the repo:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+git clone https://github.com/hastiatarod/team-hasti-atarod.git
+```
 
-## Deploy on Vercel
+Install dependencies:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```bash
+pnpm install
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Run development:
+
+```bash
+pnpm dev
+```
+
+## :handshake: Contribution Workflow (VERY IMPORTANT)
+
+1. Create a feature branch:
+   `git checkout -b feature-branch`
+2. Commit changes:
+   `git commit -m "some message"`
+3. Sync with upstream:
+   `git fetch upstream`
+   `git merge upstream/main`
+   `git push origin feature-branch`
+4. Open Pull Request
+
+## :memo: Next.js Setup Docs
+
+All Next.js-related installation and setup notes are inside:
+
+` docs/next/`

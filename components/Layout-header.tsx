@@ -14,11 +14,12 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { ModeToggle } from '@/components/Mode-toggle';
 import { Button } from '@/components/ui/button';
 import { clsx } from 'clsx';
 const Header = () => {
   return (
-    <header className="w-full bg-white border-b border-gray-200 shadow-sm">
+    <header className="w-full border-b border-gray-200  dark:border-gray-700 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16">
         {/* Left */}
         <div className="flex items-center space-x-2"></div>
@@ -31,7 +32,7 @@ const Header = () => {
                 <NavigationMenuLink asChild>
                   <Link
                     href="/"
-                    className="px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-100"
+                    className="px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-100 dark:hover:bg-gray-800"
                   >
                     Home
                   </Link>
@@ -41,7 +42,7 @@ const Header = () => {
                 <NavigationMenuLink asChild>
                   <Link
                     href="/boards"
-                    className="px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-100"
+                    className="px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-100 dark:hover:bg-gray-800"
                   >
                     Boards
                   </Link>
@@ -51,7 +52,7 @@ const Header = () => {
                 <NavigationMenuLink asChild>
                   <Link
                     href="/workspace"
-                    className="px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-100"
+                    className="px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-100 dark:hover:bg-gray-800"
                   >
                     Workspace
                   </Link>
@@ -61,7 +62,7 @@ const Header = () => {
                 <NavigationMenuLink asChild>
                   <Link
                     href="/about"
-                    className="px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-100"
+                    className="px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-100 dark:hover:bg-gray-800"
                   >
                     About
                   </Link>
@@ -72,38 +73,42 @@ const Header = () => {
         </nav>
 
         {/* Right */}
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Avatar className="w-10 h-10 cursor-pointer">
-              <AvatarImage src="https://github.com/evilrabbit.png" alt="@evilrabbit" />
-              <AvatarFallback>U</AvatarFallback>
-            </Avatar>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-48">
-            <DropdownMenuItem>
-              <Link href="/profile" className="w-full block">
-                Profile
-              </Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem>
-              <Link href="/settings" className="w-full block">
-                Settings
-              </Link>
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>
-              <Link href="/important" className="w-full block">
-                Important
-              </Link>
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>
-              <Link href="/logout" className="w-full block">
-                Logout
-              </Link>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <div className="flex items-center space-x-4">
+          {/* Dark mode toggle */}
+          <ModeToggle />
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Avatar className="w-10 h-10 cursor-pointer">
+                <AvatarImage src="https://github.com/evilrabbit.png" alt="@evilrabbit" />
+                <AvatarFallback>U</AvatarFallback>
+              </Avatar>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-48">
+              <DropdownMenuItem>
+                <Link href="/profile" className="w-full block">
+                  Profile
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem>
+                <Link href="/settings" className="w-full block">
+                  Settings
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem>
+                <Link href="/important" className="w-full block">
+                  Important
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem>
+                <Link href="/logout" className="w-full block">
+                  Logout
+                </Link>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </div>
     </header>
   );

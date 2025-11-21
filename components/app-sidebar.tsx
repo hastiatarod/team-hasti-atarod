@@ -45,7 +45,7 @@ interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {}
 
 export function AppSidebar({ className, ...props }: AppSidebarProps) {
   return (
-    <Sidebar className={className} {...props}>
+    <Sidebar collapsible="icon" className={className} {...props}>
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>

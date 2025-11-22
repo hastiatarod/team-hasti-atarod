@@ -17,21 +17,22 @@ import {
 import { ModeToggle } from '@/components/Mode-toggle';
 import { Button } from '@/components/ui/button';
 import { clsx } from 'clsx';
+import { SidebarTrigger } from './ui/sidebar';
 const Header = () => {
   return (
     <header className="w-full border-b border-gray-200  dark:border-gray-700 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16">
         {/* Left */}
-        <div className="flex items-center space-x-2"></div>
+        <SidebarTrigger />
 
         {/* Center */}
         <nav className="flex-1 flex justify-center">
           <NavigationMenu>
-            <NavigationMenuList className="flex space-x-4">
+            <NavigationMenuList className="flex space-x-4 ">
               <NavigationMenuItem>
                 <NavigationMenuLink asChild>
                   <Link
-                    href="/"
+                    href="/home"
                     className="px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-100 dark:hover:bg-gray-800"
                   >
                     Home
@@ -41,7 +42,7 @@ const Header = () => {
               <NavigationMenuItem>
                 <NavigationMenuLink asChild>
                   <Link
-                    href="/boards"
+                    href="/board"
                     className="px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-100 dark:hover:bg-gray-800"
                   >
                     Boards

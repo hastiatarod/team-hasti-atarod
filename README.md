@@ -58,11 +58,7 @@ pnpm dev
 
 ## :books: Documentation
 
-<details>
-
 - [KANBAN MODEL](https://github.com/saeedhei/team-hasti-atarod/blob/main/docs/KANBAN_MODEL.md)
-
-</details>
 
 <details>
   <summary>vscode</summary>

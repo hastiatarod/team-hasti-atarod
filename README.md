@@ -41,7 +41,7 @@ Ensure Git is installed
 Clone the repo:
 
 ```bash
-git clone https://github.com/hastiatarod/team-hasti-atarod.git
+git clone https://github.com/saeedhei/team-hasti-atarod
 ```
 
 Install dependencies:
@@ -59,9 +59,28 @@ pnpm dev
 ## :books: Documentation
 
 <details>
+  <summary>docs</summary>
+
+- [KANBAN MODEL](https://github.com/saeedhei/team-hasti-atarod/blob/main/docs/KANBAN_MODEL.md)
+
+<details>
+  <summary>vscode</summary>
+
+- [install](https://github.com/saeedhei/team-hasti-atarod/blob/main/docs/vscode/line-endings.md)
+
+</details>
+
+<details>
+  <summary>prettier</summary>
+
+- [line-endings](https://github.com/saeedhei/team-hasti-atarod/blob/main/docs/prettier/line-endings.md)
+
+</details>
+
+<details>
   <summary>pnpm</summary>
 
-- [install](https://github.com/hastiatarod/team-hasti-atarod/blob/main/docs/pnpm/install.md)
+- [install](https://github.com/saeedhei/team-hasti-atarod/blob/main/docs/pnpm/install.md)
 
 </details>
 
@@ -76,6 +95,7 @@ pnpm dev
   <summary>git</summary>
 
 - [pr](https://github.com/saeedhei/team-hasti-atarod/blob/main/docs/git/pr.md)
+- [line-endings](https://github.com/saeedhei/team-hasti-atarod/blob/main/docs/git/line-endings.md)
 
 </details>
 
@@ -91,6 +111,7 @@ pnpm dev
 
 - [docker-run](https://github.com/saeedhei/team-hasti-atarod/blob/main/docs/couchdb/docker-run.md)
 
+</details>
 </details>
 
 ## :handshake: Contribution Workflow (VERY IMPORTANT)

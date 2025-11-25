@@ -78,7 +78,7 @@ export default async function BoardsPage() {
     boards = validBoards;
   } catch (err) {
     console.error('Failed to load boards:', err);
-    errorMsg = 'خطا در بارگذاری بردها';
+    errorMsg = 'Failed to load boards';
   }
 
   return (
@@ -90,17 +90,17 @@ export default async function BoardsPage() {
       <form action={createBoard} className="flex gap-2 items-center">
         <Input
           name="title"
-          placeholder="عنوان برد جدید"
+          placeholder="New board title"
           required
           minLength={1}
           maxLength={100}
           className="max-w-sm"
         />
-        <Button type="submit">ساختن برد</Button>
+        <Button type="submit">Create Board</Button>
       </form>
 
       {boards.length === 0 ? (
-        <p className="text-gray-500">هنوز هیچ بردی ساخته نشده.</p>
+        <p className="text-gray-500">No boards have been created yet.</p>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {boards.map((board) => (
@@ -110,13 +110,13 @@ export default async function BoardsPage() {
                   <span className="truncate">{board.title}</span>
                   <form action={deleteBoard.bind(null, board._id)}>
                     <Button type="submit" variant="destructive" size="sm">
-                      حذف
+                      Delete
                     </Button>
                   </form>
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-sm text-gray-600">{board.description || 'بدون توضیحات'}</p>
+                <p className="text-sm text-gray-600">{board.description || 'No description'}</p>
               </CardContent>
             </Card>
           ))}

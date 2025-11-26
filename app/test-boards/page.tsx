@@ -1,3 +1,4 @@
+// app/test-boards/page.tsx
 import { revalidatePath } from 'next/cache';
 import { boardsDB } from '@/lib/couchdb';
 import type { Board } from '@/types/board';

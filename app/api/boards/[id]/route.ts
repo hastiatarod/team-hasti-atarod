@@ -1,3 +1,4 @@
+// app/api/boards/[id]/route.ts
 // GET / PUT / DELETE for a single board
 
 import { NextResponse } from 'next/server';

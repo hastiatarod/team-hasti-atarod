@@ -1,4 +1,5 @@
 // app/test-boards/page.tsx
+import Link from 'next/link';
 import { revalidatePath } from 'next/cache';
 import { boardsDB } from '@/lib/couchdb';
 import type { Board } from '@/types/board';
@@ -109,11 +110,19 @@ export default async function BoardsPage() {
               <CardHeader>
                 <CardTitle className="flex justify-between items-center gap-4">
                   <span className="truncate">{board.title}</span>
-                  <form action={deleteBoard.bind(null, board._id)}>
-                    <Button type="submit" variant="destructive" size="sm">
-                      Delete
-                    </Button>
-                  </form>
+                  <div className="flex gap-2">
+                    {/* Open button */}
+                    <Link href={`/boards/${board._id}`}>
+                      <Button variant="default" size="sm">
+                        Open
+                      </Button>
+                    </Link>
+                    <form action={deleteBoard.bind(null, board._id)}>
+                      <Button type="submit" variant="destructive" size="sm">
+                        Delete
+                      </Button>
+                    </form>
+                  </div>
                 </CardTitle>
               </CardHeader>
               <CardContent>

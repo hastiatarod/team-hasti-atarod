@@ -23,13 +23,6 @@ function slugify(title: string) {
     .replace(/[^\w-]+/g, '');
 }
 
-function slugify(title: string) {
-  return title
-    .toLowerCase()
-    .replace(/ /g, '-')
-    .replace(/[^\w-]+/g, '');
-}
-
 // Conversion function without using any
 function asBoard(doc: unknown): Board | null {
   if (!doc || typeof doc !== 'object') return null;

@@ -141,20 +141,20 @@ const ColumnView: React.FC<{
 
         <span className="text-sm text-slate-500">{column.tasks.length}</span>
       </div>
+      <Button
+        variant="outline"
+        size="sm"
+        className="w-full mb-3 cursor-pointer"
+        onClick={() => onAddTaskClick(column.id)}
+      >
+        + Add Card
+      </Button>
 
       <div className="space-y-3">
         {column.tasks.map((task) => (
           <TaskCard key={task.id} task={task} onClick={() => onTaskClick(task)} />
         ))}
       </div>
-      <Button
-        variant="outline"
-        size="sm"
-        className="w-full mt-3 cursor-pointer"
-        onClick={() => onAddTaskClick(column.id)}
-      >
-        + Add Task
-      </Button>
     </section>
   );
 };

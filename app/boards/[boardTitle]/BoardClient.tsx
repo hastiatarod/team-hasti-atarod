@@ -1,4 +1,4 @@
-// app/boards/[id]/BoardClient.tsx
+// app/boards/[boardTitle]/BoardClient.tsx
 'use client';
 
 import { useCallback, useMemo, useState } from 'react';

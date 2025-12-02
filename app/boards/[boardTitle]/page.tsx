@@ -1,21 +1,21 @@
-// app/boards/[id]/page.tsx
+// app/boards/[boardTitle]/page.tsx
 import { boardsDB } from '@/lib/couchdb';
 import BoardClient from './BoardClient';
 import type { Board } from '@/types/board';
 
-// In Next.js 15+, params is a Promise
 type PageProps = {
-  params: Promise<{ id: string }>;
+  params: Promise<{ boardTitle: string }>;
 };
 
 export default async function BoardPage({ params }: PageProps) {
   // Await the params before accessing the ID
-  const { id } = await params;
+  const { boardTitle } = await params;
+  const decoded = decodeURIComponent(boardTitle);
 
   let board: Board | null = null;
 
   try {
-    board = (await boardsDB.get(id)) as Board;
+    board = (await boardsDB.get(decoded)) as Board;
   } catch (err) {
     console.error('BOARD NOT FOUND:', err);
     return <div className="p-6">Board not found</div>;

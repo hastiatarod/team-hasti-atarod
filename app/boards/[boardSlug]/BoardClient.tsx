@@ -1,10 +1,13 @@
 // app/boards/[boardTitle]/BoardClient.tsx
 'use client';
 
-import { useCallback, useMemo, useState } from 'react';
-import { addTaskAction, createListAction, deleteListAction, deleteTaskAction } from './actions';
-import { TaskDetails } from './TaskDetails';
-import type { Board, List, Task } from '@/types/board';
+import { useMemo, useState } from 'react';
+import { createCardAction, createListAction, deleteListAction, deleteCardAction } from './actions';
+
+import { CardDetails } from './CardDetails';
+import type { Board } from '@/types/board';
+import type { List } from '@/types/list';
+import type { Card } from '@/types/card';
 
 import { Drawer, DrawerContent } from '@/components/ui/drawer';
 
@@ -22,25 +25,22 @@ import { Label } from '@/components/ui/label';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
-import { title } from 'process';
 
-// Utility: simple id generator
-const genId = (prefix = '') => `${prefix}${Math.random().toString(36).slice(2, 9)}`;
+// ---------------------- Card view ----------------------
 
-// ---------------------- Task Card ----------------------
-const TaskCard = ({ task, onClick }: { task: Task; onClick?: () => void }) => (
+const CardView = ({ card, onClick }: { card: Card; onClick?: () => void }) => (
   <article
     className="bg-white border rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
     onClick={onClick}
   >
-    <h3 className="text-sm font-semibold">{task.title}</h3>
+    <h3 className="text-sm font-semibold">{card.title}</h3>
 
-    {task.description && <p className="text-xs text-slate-600 mt-2">{task.description}</p>}
+    {card.description && <p className="text-xs text-slate-600 mt-2">{card.description}</p>}
 
     <div className="mt-3 flex items-center justify-between gap-2">
       {/* Tags */}
       <div className="flex flex-wrap gap-2">
-        {task.tags?.slice(0, 3).map((t) => (
+        {card.tags?.slice(0, 3).map((t) => (
           <Badge key={t.id} className="text-xs py-1 px-2">
             {t.label}
           </Badge>
@@ -49,24 +49,24 @@ const TaskCard = ({ task, onClick }: { task: Task; onClick?: () => void }) => (
 
       {/* Progress + Assignee */}
       <div className="flex items-center gap-2">
-        {typeof task.progress === 'number' && (
+        {typeof card.progress === 'number' && (
           <div className="w-24 text-xs">
             <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
               <div
                 className="h-full rounded-full bg-yellow-500"
                 style={{
-                  width: `${Math.min(100, Math.max(0, task.progress))}%`,
+                  width: `${Math.min(100, Math.max(0, card.progress))}%`,
                 }}
               />
             </div>
-            <div className="text-slate-500 text-[10px] mt-1">{task.progress}%</div>
+            <div className="text-slate-500 text-[10px] mt-1">{card.progress}%</div>
           </div>
         )}
 
-        {task.assignee && (
+        {card.assignee && (
           <Avatar className="h-7 w-7">
             <AvatarFallback>
-              {task.assignee.initials ?? task.assignee.name.charAt(0).toUpperCase()}
+              {card.assignee.initials ?? card.assignee.name.charAt(0).toUpperCase()}
             </AvatarFallback>
           </Avatar>
         )}
@@ -78,16 +78,18 @@ const TaskCard = ({ task, onClick }: { task: Task; onClick?: () => void }) => (
 // ---------------------- List View ----------------------
 const ListView = ({
   list,
-  onTaskClick,
-  onAddTaskClick,
+  cards,
+  onCardClick,
+  onAddCardClick,
   onDeleteList,
-  onDeleteTask,
+  onDeleteCard,
 }: {
   list: List;
-  onTaskClick: (task: Task) => void;
-  onAddTaskClick: (listId: string) => void;
+  cards: Card[];
+  onCardClick: (card: Card) => void;
+  onAddCardClick: (listId: string) => void;
   onDeleteList: (listId: string) => void;
-  onDeleteTask: (taskId: string) => void;
+  onDeleteCard: (cardId: string) => void;
 }) => (
   <section className="w-full max-w-xs">
     <div className="flex items-center justify-between mb-3">
@@ -98,22 +100,22 @@ const ListView = ({
       {/* Delete List Button */}
       <button
         className="text-red-500 hover:text-red-700 text-xs"
-        onClick={() => onDeleteList(list.id)}
+        onClick={() => onDeleteList(list._id)}
       >
         Delete
       </button>
     </div>
 
     <div className="space-y-3">
-      {list.tasks.map((task) => (
-        <div key={task.id} className="relative">
-          <TaskCard key={task.id} task={task} onClick={() => onTaskClick(task)} />
-          {/* Delete Task Button */}
+      {cards.map((card) => (
+        <div key={card._id} className="relative">
+          <CardView card={card} onClick={() => onCardClick(card)} />
+          {/* Delete Card Button */}
           <button
             className="absolute top-2 right-2 text-red-500 text-xs hover:text-red-700"
             onClick={(e) => {
               e.stopPropagation();
-              onDeleteTask(task.id);
+              onDeleteCard(card._id);
             }}
           >
             ✕
@@ -126,7 +128,7 @@ const ListView = ({
       variant="outline"
       size="sm"
       className="w-full mt-3 cursor-pointer"
-      onClick={() => onAddTaskClick(list.id)}
+      onClick={() => onAddCardClick(list._id)}
     >
       + Add Card
     </Button>
@@ -135,93 +137,75 @@ const ListView = ({
 
 // ---------------------- Main Component ----------------------
 export default function BoardClient({ initialBoard }: { initialBoard: Board }) {
-  const safeBoard: Board = {
-    ...initialBoard,
-    list: Array.isArray(initialBoard.list) ? initialBoard.list : [],
-  };
-
-  const [board, setBoard] = useState<Board>(safeBoard);
+  const [board] = useState<Board>(initialBoard);
+  const [lists, setLists] = useState<List[]>([]);
+  const [cards, setCards] = useState<Card[]>([]);
 
   const [isCreatingList, setIsCreatingList] = useState(false);
-  const [isCreatingTask, setIsCreatingTask] = useState(false);
-  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
-  const [isTaskOpen, setIsTaskOpen] = useState(false);
+  const [isCreatingCard, setIsCreatingCard] = useState(false);
+  const [selectedCard, setSelectedCard] = useState<Card | null>(null);
+  const [isCardOpen, setIsCardOpen] = useState(false);
   const [targetListId, setTargetListId] = useState<string | null>(null);
 
-  const lists = useMemo(() => board.list, [board.list]);
+  const cardsByList = useMemo(() => {
+    const map: Record<string, Card[]> = {};
+    for (const card of cards) {
+      if (!map[card.listId]) map[card.listId] = [];
+      map[card.listId].push(card);
+    }
+    return map;
+  }, [cards]);
 
-  const boardId = board._id;
+  // ---------------- Add  card----------------
+  const addCard = async (
+    listId: string,
+    payload: Pick<Card, 'title' | 'description' | 'priority'>,
+  ) => {
+    const card: Card = {
+      _id: `card:${crypto.randomUUID()}`,
+      type: 'card',
+      boardId: board._id,
+      listId,
+      title: payload.title,
+      description: payload.description,
+      priority: payload.priority ?? 'low',
+      position: cards.filter((c) => c.listId === listId).length,
+    };
 
-  // ---------------- Add Task ----------------
-  const addTask = useCallback(
-    async (listId: string, payload: Pick<Task, 'title' | 'description' | 'priority'>) => {
-      const newTask: Task = {
-        id: genId('t-'),
-        title: payload.title,
-        description: payload.description,
-        priority: payload.priority ?? 'low',
-      };
-
-      // Optimistic UI update
-      setBoard((prev) => ({
-        ...prev,
-        list: prev.list.map((list) =>
-          list.id === listId ? { ...list, tasks: [newTask, ...list.tasks] } : list,
-        ),
-      }));
-
-      await addTaskAction(boardId, listId, newTask);
-    },
-    [boardId],
-  );
+    // Optimistic UI update
+    setCards((prev) => [...prev, card]);
+    await createCardAction(card);
+  };
 
   // ---------------- Add List ----------------
-  const addList = useCallback(
-    async (title: string) => {
-      const newList: List = {
-        id: genId('list-'),
-        title,
-        color: 'bg-slate-300',
-        tasks: [],
-      };
+  const addList = async (title: string) => {
+    const list: List = {
+      _id: `list:${crypto.randomUUID()}`,
+      type: 'list',
+      boardId: board._id,
+      title,
+      position: lists.length,
+      color: 'bg-slate-300',
+    };
 
-      // Optimistic UI update
-      setBoard((prev) => ({
-        ...prev,
-        list: [...prev.list, newList],
-      }));
-      await createListAction(boardId, newList);
-    },
-    [boardId],
-  );
+    // Optimistic UI update
+    setLists((prev) => [...prev, list]);
+    await createListAction(list);
+  };
+
   // ---------------- Delete List ----------------
-  const deleteList = useCallback(
-    async (listId: string) => {
-      // Optimistic UI update
-      setBoard((prev) => ({
-        ...prev,
-        list: prev.list.filter((l) => l.id !== listId),
-      }));
-
-      await deleteListAction(boardId, listId);
-    },
-    [boardId],
-  );
-  // ---------------- Delete Task ----------------
-  const deleteTask = useCallback(
-    async (listId: string, taskId: string) => {
-      // Optimistic update
-      setBoard((prev) => ({
-        ...prev,
-        list: prev.list.map((l) =>
-          l.id === listId ? { ...l, tasks: l.tasks.filter((t) => t.id !== taskId) } : l,
-        ),
-      }));
-
-      await deleteTaskAction(boardId, listId, taskId);
-    },
-    [boardId],
-  );
+  const deleteList = async (listId: string) => {
+    // Optimistic UI update
+    setLists((prev) => prev.filter((l) => l._id !== listId));
+    setCards((prev) => prev.filter((c) => c.listId !== listId));
+    await deleteListAction(board._id, listId);
+  };
+  // ---------------- Delete Card ----------------
+  const deleteCard = async (cardId: string) => {
+    // Optimistic update
+    setCards((prev) => prev.filter((c) => c._id !== cardId));
+    await deleteCardAction(board._id, cardId);
+  };
 
   return (
     <main className="p-6 max-w-full">
@@ -248,47 +232,48 @@ export default function BoardClient({ initialBoard }: { initialBoard: Board }) {
           </DialogContent>
         </Dialog>
       </header>
-      {/* Create Task Dialog */}
-      <Dialog open={isCreatingTask} onOpenChange={setIsCreatingTask}>
+      {/* Create Card Dialog */}
+      <Dialog open={isCreatingCard} onOpenChange={setIsCreatingCard}>
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
             <DialogTitle>Create Card</DialogTitle>
           </DialogHeader>
 
-          <CreateTaskForm
+          <CreateCardForm
             lists={lists}
             selectedListId={targetListId ?? undefined}
             onCreate={(listId, payload) => {
-              addTask(listId, payload);
-              setIsCreatingTask(false);
+              addCard(listId, payload);
+              setIsCreatingCard(false);
             }}
           />
         </DialogContent>
       </Dialog>
 
-      {/* Task Drawer */}
-      <Drawer open={isTaskOpen} onOpenChange={setIsTaskOpen}>
+      {/* Card Drawer */}
+      <Drawer open={isCardOpen} onOpenChange={setIsCardOpen}>
         <DrawerContent className="w-1/2 ml-auto p-6 overflow-auto">
-          {selectedTask && <TaskDetails task={selectedTask} onClose={() => setIsTaskOpen(false)} />}
+          {selectedCard && <CardDetails card={selectedCard} onClose={() => setIsCardOpen(false)} />}
         </DrawerContent>
       </Drawer>
 
       {/* Lists */}
       <section className="flex gap-6 overflow-x-auto pb-6 scrollbar-hide">
         {lists.map((list) => (
-          <div key={list.id} className="shrink-0" style={{ width: 270 }}>
+          <div key={list._id} className="shrink-0" style={{ width: 270 }}>
             <ListView
               list={list}
-              onTaskClick={(task) => {
-                setSelectedTask(task);
-                setIsTaskOpen(true);
+              cards={cardsByList[list._id] ?? []}
+              onCardClick={(card) => {
+                setSelectedCard(card);
+                setIsCardOpen(true);
               }}
-              onAddTaskClick={(listId) => {
+              onAddCardClick={(listId) => {
                 setTargetListId(listId);
-                setIsCreatingTask(true);
+                setIsCreatingCard(true);
               }}
               onDeleteList={(listId) => deleteList(listId)}
-              onDeleteTask={(taskId) => deleteTask(list.id, taskId)}
+              onDeleteCard={(cardId) => deleteCard(cardId)}
             />
           </div>
         ))}
@@ -297,20 +282,20 @@ export default function BoardClient({ initialBoard }: { initialBoard: Board }) {
   );
 }
 
-// ---------------------- Create Task Form ----------------------
-const CreateTaskForm = ({
+// ---------------------- Create Card Form ----------------------
+const CreateCardForm = ({
   lists,
   selectedListId,
   onCreate,
 }: {
   lists: List[];
   selectedListId?: string;
-  onCreate: (listId: string, payload: Pick<Task, 'title' | 'description' | 'priority'>) => void;
+  onCreate: (listId: string, payload: Pick<Card, 'title' | 'description' | 'priority'>) => void;
 }) => {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [listId, setListId] = useState(selectedListId ?? lists[0]?.id ?? '');
-  const [priority, setPriority] = useState<Task['priority']>('low');
+  const [listId, setListId] = useState(selectedListId ?? lists[0]?._id ?? '');
+  const [priority, setPriority] = useState<Card['priority']>('low');
 
   const disabled = title.trim().length === 0;
 
@@ -356,7 +341,7 @@ const CreateTaskForm = ({
           onChange={(e) => setListId(e.target.value)}
         >
           {lists.map((l) => (
-            <option key={l.id} value={l.id}>
+            <option key={l._id} value={l._id}>
               {l.title}
             </option>
           ))}

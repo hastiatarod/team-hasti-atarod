@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { revalidatePath } from 'next/cache';
 import { boardsDB } from '@/lib/couchdb';
 import type { Board } from '@/types/board';
+
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -19,7 +20,8 @@ import {
 function slugify(title: string) {
   return title
     .toLowerCase()
-    .replace(/ /g, '-')
+    .trim()
+    .replace(/\s+/g, '-')
     .replace(/[^\w-]+/g, '');
 }
 
@@ -32,14 +34,15 @@ function asBoard(doc: unknown): Board | null {
   if (typeof candidate._id !== 'string') return null;
   if (candidate.type !== 'board') return null;
   if (typeof candidate.title !== 'string' || candidate.title.trim() === '') return null;
+  if (typeof candidate.slug !== 'string' || candidate.slug.trim() === '') return null;
 
   return {
     _id: candidate._id,
     _rev: typeof candidate._rev === 'string' ? candidate._rev : undefined,
     type: 'board',
     title: candidate.title,
+    slug: candidate.slug,
     description: typeof candidate.description === 'string' ? candidate.description : undefined,
-    list: Array.isArray(candidate.list) ? (candidate.list as any[]) : [],
   };
 }
 
@@ -52,16 +55,11 @@ async function createBoard(formData: FormData) {
 
   try {
     await boardsDB.insert({
-      _id: `${slugify(title.trim())}-${Math.random().toString(36).slice(2, 7)}`,
+      _id: `board:${crypto.randomUUID()}`,
       type: 'board',
       title: title.trim(),
+      slug: slugify(title.trim()),
       description: typeof description === 'string' ? description.trim() : undefined,
-      list: [
-        { id: 'backlog', title: 'Backlog', color: 'bg-slate-400', tasks: [] },
-        { id: 'todo', title: 'To Do', color: 'bg-sky-400', tasks: [] },
-        { id: 'inprogress', title: 'In Progress', color: 'bg-amber-400', tasks: [] },
-        { id: 'done', title: 'Completed', color: 'bg-emerald-400', tasks: [] },
-      ],
     } as Board);
     revalidatePath('/test-boards');
   } catch (err) {
@@ -154,7 +152,7 @@ export default async function BoardsPage() {
                 <span className="truncate">{board.title}</span>
                 <div className="flex gap-2">
                   {/* Open button */}
-                  <Link href={`/boards/${board._id}`}>
+                  <Link href={`/boards/${board.slug}`}>
                     <Button variant="default" size="sm">
                       Open
                     </Button>

@@ -23,6 +23,13 @@ export async function GET() {
     return NextResponse.json({ error: 'Failed to fetch boards' }, { status: 500 });
   }
 }
+function slugify(title: string) {
+  return title
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g, '-')
+    .replace(/[^\w-]+/g, '');
+}
 
 export async function POST(req: Request) {
   try {
@@ -39,13 +46,8 @@ export async function POST(req: Request) {
       _id: randomUUID(),
       type: 'board',
       title,
+      slug: slugify(title),
       description,
-      list: [
-        { id: 'backlog', title: 'Backlog', color: 'bg-slate-400', tasks: [] },
-        { id: 'todo', title: 'To Do', color: 'bg-sky-400', tasks: [] },
-        { id: 'inprogress', title: 'In Progress', color: 'bg-amber-400', tasks: [] },
-        { id: 'done', title: 'Completed', color: 'bg-emerald-400', tasks: [] },
-      ],
     };
 
     const result = await boardsDB.insert(board);

@@ -22,7 +22,8 @@ function slugify(title: string) {
     .toLowerCase()
     .trim()
     .replace(/\s+/g, '-')
-    .replace(/[^\w-]+/g, '');
+    .replace(/[^\p{L}\p{N}_-]+/gu, '')
+    .replace(/-+/g, '-');
 }
 
 // Conversion function without using any

@@ -28,7 +28,8 @@ function slugify(title: string) {
     .toLowerCase()
     .trim()
     .replace(/\s+/g, '-')
-    .replace(/[^\w-]+/g, '');
+    .replace(/[^\p{L}\p{N}_-]+/gu, '')
+    .replace(/-+/g, '-');
 }
 
 export async function POST(req: Request) {

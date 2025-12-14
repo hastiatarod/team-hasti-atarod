@@ -6,5 +6,6 @@ export interface Board extends MaybeDocument {
   _rev?: string; // CouchDB revision (optional on inserts)
   type: 'board'; // document discriminator
   title: string; // board name/title
+  slug: string;
   description?: string; // optional board description
 }

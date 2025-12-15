@@ -6,6 +6,7 @@ import type { Board } from '@/types/board';
 import type { DocumentListResponse } from 'nano';
 import { createBoardSchema } from '@/validations/board';
 import { randomUUID } from 'crypto';
+import { generateSlug } from '@/lib/slug';
 
 export async function GET() {
   try {
@@ -23,14 +24,6 @@ export async function GET() {
     return NextResponse.json({ error: 'Failed to fetch boards' }, { status: 500 });
   }
 }
-function slugify(title: string) {
-  return title
-    .toLowerCase()
-    .trim()
-    .replace(/\s+/g, '-')
-    .replace(/[^\p{L}\p{N}_-]+/gu, '')
-    .replace(/-+/g, '-');
-}
 
 export async function POST(req: Request) {
   try {
@@ -42,12 +35,13 @@ export async function POST(req: Request) {
     }
 
     const { title, description } = parsed.data;
+    const slug = generateSlug(title);
 
     const board: Board = {
-      _id: randomUUID(),
+      _id: `board:${randomUUID()}`,
       type: 'board',
       title,
-      slug: slugify(title),
+      slug,
       description,
     };
 

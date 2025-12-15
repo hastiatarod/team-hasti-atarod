@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Plus } from 'lucide-react';
+import { generateSlug } from '@/lib/slug';
 import {
   Dialog,
   DialogContent,
@@ -16,15 +17,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-
-function slugify(title: string) {
-  return title
-    .toLowerCase()
-    .trim()
-    .replace(/\s+/g, '-')
-    .replace(/[^\p{L}\p{N}_-]+/gu, '')
-    .replace(/-+/g, '-');
-}
 
 // Conversion function without using any
 function asBoard(doc: unknown): Board | null {
@@ -54,12 +46,14 @@ async function createBoard(formData: FormData) {
   const description = formData.get('description');
   if (typeof title !== 'string' || title.trim() === '') return;
 
+  const slug = generateSlug(title);
+
   try {
     await boardsDB.insert({
       _id: `board:${crypto.randomUUID()}`,
       type: 'board',
       title: title.trim(),
-      slug: slugify(title.trim()),
+      slug,
       description: typeof description === 'string' ? description.trim() : undefined,
     } as Board);
     revalidatePath('/boards');

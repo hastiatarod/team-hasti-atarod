@@ -1,4 +1,4 @@
-// app/boards/[boardTitle]/BoardClient.tsx
+// app/boards/[boardSlug]/BoardClient.tsx
 'use client';
 
 import { useMemo, useState } from 'react';
@@ -136,10 +136,18 @@ const ListView = ({
 );
 
 // ---------------------- Main Component ----------------------
-export default function BoardClient({ initialBoard }: { initialBoard: Board }) {
+export default function BoardClient({
+  initialBoard,
+  initialLists,
+  initialCards,
+}: {
+  initialBoard: Board;
+  initialLists: List[];
+  initialCards: Card[];
+}) {
   const [board] = useState<Board>(initialBoard);
-  const [lists, setLists] = useState<List[]>([]);
-  const [cards, setCards] = useState<Card[]>([]);
+  const [lists, setLists] = useState<List[]>(initialLists);
+  const [cards, setCards] = useState<Card[]>(initialCards);
 
   const [isCreatingList, setIsCreatingList] = useState(false);
   const [isCreatingCard, setIsCreatingCard] = useState(false);
@@ -174,7 +182,7 @@ export default function BoardClient({ initialBoard }: { initialBoard: Board }) {
 
     // Optimistic UI update
     setCards((prev) => [...prev, card]);
-    await createCardAction(card);
+    await createCardAction(card, board.slug);
   };
 
   // ---------------- Add List ----------------
@@ -190,7 +198,7 @@ export default function BoardClient({ initialBoard }: { initialBoard: Board }) {
 
     // Optimistic UI update
     setLists((prev) => [...prev, list]);
-    await createListAction(list);
+    await createListAction(list, board.slug);
   };
 
   // ---------------- Delete List ----------------
@@ -198,13 +206,13 @@ export default function BoardClient({ initialBoard }: { initialBoard: Board }) {
     // Optimistic UI update
     setLists((prev) => prev.filter((l) => l._id !== listId));
     setCards((prev) => prev.filter((c) => c.listId !== listId));
-    await deleteListAction(board._id, listId);
+    await deleteListAction(board._id, listId, board.slug);
   };
   // ---------------- Delete Card ----------------
   const deleteCard = async (cardId: string) => {
     // Optimistic update
     setCards((prev) => prev.filter((c) => c._id !== cardId));
-    await deleteCardAction(board._id, cardId);
+    await deleteCardAction(board._id, cardId, board.slug);
   };
 
   return (

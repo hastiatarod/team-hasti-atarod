@@ -1,18 +1,18 @@
-//app/boards/[boardTitle]/actions.ts
+//app/boards/[boardSlug]/actions.ts
 'use server';
 
-import { db } from '@/lib/couchdb';
+import { kanbansDB } from '@/lib/couchdb';
 import { revalidatePath } from 'next/cache';
 import type { List } from '@/types/list';
 import type { Card } from '@/types/card';
 
 // ---------------------- Create Card ----------------------
 
-export async function createCardAction(card: Card) {
+export async function createCardAction(card: Card, boardSlug: string) {
   try {
-    await db.insert(card);
+    await kanbansDB.insert(card);
 
-    revalidatePath(`/boards/${card.boardId}`);
+    revalidatePath(`/boards/${boardSlug}`);
   } catch (err) {
     console.error('CREATE CARD FAILED:', err);
     throw err;
@@ -21,11 +21,11 @@ export async function createCardAction(card: Card) {
 
 // ---------------------- Create List ----------------------
 
-export async function createListAction(list: List) {
+export async function createListAction(list: List, boardSlug: string) {
   try {
-    await db.insert(list);
+    await kanbansDB.insert(list);
 
-    revalidatePath(`/boards/${list.boardId}`);
+    revalidatePath(`/boards/$${boardSlug}`);
   } catch (err) {
     console.error('CREATE LIST FAILED:', err);
     throw err;
@@ -33,12 +33,12 @@ export async function createListAction(list: List) {
 }
 
 // ---------------------- Delete List ----------------------
-export async function deleteListAction(boardId: string, listId: string) {
+export async function deleteListAction(boardId: string, listId: string, boardSlug: string) {
   try {
-    const list = await db.get(listId);
-    await db.destroy(list._id, list._rev);
+    const list = await kanbansDB.get(listId);
+    await kanbansDB.destroy(list._id, list._rev);
 
-    revalidatePath(`/boards/${boardId}`);
+    revalidatePath(`/boards/${boardSlug}`);
   } catch (err) {
     console.error('DELETE LIST FAILED:', err);
     throw err;
@@ -48,12 +48,12 @@ export async function deleteListAction(boardId: string, listId: string) {
 
 // ---------------------- Delete Card ----------------------
 
-export async function deleteCardAction(boardId: string, cardId: string) {
+export async function deleteCardAction(boardId: string, cardId: string, boardSlug: string) {
   try {
-    const card = await db.get(cardId);
-    await db.destroy(card._id, card._rev);
+    const card = await kanbansDB.get(cardId);
+    await kanbansDB.destroy(card._id, card._rev);
 
-    revalidatePath(`/boards/${boardId}`);
+    revalidatePath(`/boards/${boardSlug}`);
   } catch (err) {
     console.error('DELETE CARD FAILED:', err);
     throw err;

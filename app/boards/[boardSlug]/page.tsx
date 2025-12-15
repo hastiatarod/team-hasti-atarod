@@ -1,7 +1,9 @@
 // app/boards/[boardTitle]/page.tsx
-import { db } from '@/lib/couchdb';
+import { kanbansDB } from '@/lib/couchdb';
 import BoardClient from './BoardClient';
 import type { Board } from '@/types/board';
+import type { List } from '@/types/list';
+import type { Card } from '@/types/card';
 
 type PageProps = {
   params: Promise<{ boardSlug: string }>;
@@ -10,7 +12,7 @@ type PageProps = {
 export default async function BoardPage({ params }: PageProps) {
   const { boardSlug } = await params;
 
-  const result = await db.find({
+  const boardResult = await kanbansDB.find({
     selector: {
       type: 'board',
       slug: boardSlug,
@@ -18,11 +20,22 @@ export default async function BoardPage({ params }: PageProps) {
     limit: 1,
   });
 
-  if (result.docs.length === 0) {
+  if (boardResult.docs.length === 0) {
     return <div className="p-6">Board not found</div>;
   }
+  const board = boardResult.docs[0] as Board;
 
-  const board = result.docs[0] as Board;
+  const [listResult, cardResult] = await Promise.all([
+    kanbansDB.find({
+      selector: { type: 'list', boardId: board._id },
+    }),
+    kanbansDB.find({
+      selector: { type: 'card', boardId: board._id },
+    }),
+  ]);
 
-  return <BoardClient initialBoard={board} />;
+  const lists = listResult.docs as List[];
+  const cards = cardResult.docs as Card[];
+
+  return <BoardClient initialBoard={board} initialLists={lists} initialCards={cards} />;
 }

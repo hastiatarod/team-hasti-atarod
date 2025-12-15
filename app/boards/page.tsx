@@ -1,7 +1,7 @@
 // app/test-boards/page.tsx
 import Link from 'next/link';
 import { revalidatePath } from 'next/cache';
-import { boardsDB } from '@/lib/couchdb';
+import { kanbansDB } from '@/lib/couchdb';
 import type { Board } from '@/types/board';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Plus } from 'lucide-react';
+import { generateSlug } from '@/lib/slug';
 import {
   Dialog,
   DialogContent,
@@ -16,15 +17,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-
-function slugify(title: string) {
-  return title
-    .toLowerCase()
-    .trim()
-    .replace(/\s+/g, '-')
-    .replace(/[^\p{L}\p{N}_-]+/gu, '')
-    .replace(/-+/g, '-');
-}
 
 // Conversion function without using any
 function asBoard(doc: unknown): Board | null {
@@ -54,15 +46,17 @@ async function createBoard(formData: FormData) {
   const description = formData.get('description');
   if (typeof title !== 'string' || title.trim() === '') return;
 
+  const slug = generateSlug(title);
+
   try {
-    await boardsDB.insert({
+    await kanbansDB.insert({
       _id: `board:${crypto.randomUUID()}`,
       type: 'board',
       title: title.trim(),
-      slug: slugify(title.trim()),
+      slug,
       description: typeof description === 'string' ? description.trim() : undefined,
     } as Board);
-    revalidatePath('/test-boards');
+    revalidatePath('/boards');
   } catch (err) {
     console.error('Failed to create board:', err);
   }
@@ -72,11 +66,11 @@ async function createBoard(formData: FormData) {
 async function deleteBoard(id: string) {
   'use server';
   try {
-    const doc = await boardsDB.get(id);
+    const doc = await kanbansDB.get(id);
     if (doc && typeof doc === 'object') {
       const candidate = doc as unknown as Record<string, unknown>;
       if (typeof candidate._rev === 'string') {
-        await boardsDB.destroy(id, candidate._rev);
+        await kanbansDB.destroy(id, candidate._rev);
       }
     }
   } catch (error) {
@@ -85,7 +79,7 @@ async function deleteBoard(id: string) {
       console.error('Delete failed:', error);
     }
   } finally {
-    revalidatePath('/test-boards');
+    revalidatePath('/boards');
   }
 }
 
@@ -95,7 +89,7 @@ export default async function BoardsPage() {
   let errorMsg: string | null = null;
 
   try {
-    const result = await boardsDB.list({ include_docs: true });
+    const result = await kanbansDB.list({ include_docs: true });
 
     const rawDocs = result.rows.map((row) => row.doc as unknown);
 

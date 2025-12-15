@@ -1,16 +1,17 @@
 // app/api/boards/route.ts
 // GET (board list) + POST (create board)
 import { NextResponse } from 'next/server';
-import { boardsDB } from '@/lib/couchdb';
+import { kanbansDB } from '@/lib/couchdb';
 import type { Board } from '@/types/board';
 import type { DocumentListResponse } from 'nano';
 import { createBoardSchema } from '@/validations/board';
 import { randomUUID } from 'crypto';
+import { generateSlug } from '@/lib/slug';
 
 export async function GET() {
   try {
     // nano: list() returns docs with type `unknown` instead of Board
-    const raw = await boardsDB.list({ include_docs: true });
+    const raw = await kanbansDB.list({ include_docs: true });
 
     // Let TypeScript know that row.doc is a Board
     const data = raw as DocumentListResponse<Board>;
@@ -23,14 +24,6 @@ export async function GET() {
     return NextResponse.json({ error: 'Failed to fetch boards' }, { status: 500 });
   }
 }
-function slugify(title: string) {
-  return title
-    .toLowerCase()
-    .trim()
-    .replace(/\s+/g, '-')
-    .replace(/[^\p{L}\p{N}_-]+/gu, '')
-    .replace(/-+/g, '-');
-}
 
 export async function POST(req: Request) {
   try {
@@ -42,16 +35,17 @@ export async function POST(req: Request) {
     }
 
     const { title, description } = parsed.data;
+    const slug = generateSlug(title);
 
     const board: Board = {
-      _id: randomUUID(),
+      _id: `board:${randomUUID()}`,
       type: 'board',
       title,
-      slug: slugify(title),
+      slug,
       description,
     };
 
-    const result = await boardsDB.insert(board);
+    const result = await kanbansDB.insert(board);
 
     return NextResponse.json({ message: 'Board created', id: result.id }, { status: 201 });
   } catch (err) {

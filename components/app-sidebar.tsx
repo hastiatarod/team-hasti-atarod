@@ -40,11 +40,6 @@ const items = [
     url: '/',
     icon: Clock,
   },
-  {
-    title: 'My Board',
-    url: '/Board-page-sidebar',
-    icon: ListTodoIcon,
-  },
 ];
 interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {}
 

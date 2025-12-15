@@ -62,7 +62,7 @@ async function createBoard(formData: FormData) {
       slug: slugify(title.trim()),
       description: typeof description === 'string' ? description.trim() : undefined,
     } as Board);
-    revalidatePath('/test-boards');
+    revalidatePath('/boards');
   } catch (err) {
     console.error('Failed to create board:', err);
   }
@@ -85,7 +85,7 @@ async function deleteBoard(id: string) {
       console.error('Delete failed:', error);
     }
   } finally {
-    revalidatePath('/test-boards');
+    revalidatePath('/boards');
   }
 }
 

@@ -1,14 +1,14 @@
-// app/api/boards/[id]/route.ts
-// GET / PUT / DELETE for a single board
+// app/api/lists/[listId]/route.ts
+// GET / PUT / DELETE for a single list
 
 import { NextResponse } from 'next/server';
 import { kanbansDB } from '@/lib/couchdb';
-import type { Board } from '@/types/board';
-import { updateBoardSchema } from '@/validations/board';
+import type { List } from '@/types/list';
+import { updateListSchema } from '@/validations/list';
 
 // ---------- Types ----------
 interface Params {
-  params: { id: string };
+  params: { listId: string };
 }
 
 interface NanoError {
@@ -43,29 +43,29 @@ function getMessage(err: unknown): string {
   return 'Unknown error';
 }
 
-// ---------- GET /api/boards/[id] ----------
+// ---------- GET /api/lists/[listId] ----------
 export async function GET(_: Request, { params }: Params) {
   try {
-    const board = (await kanbansDB.get(params.id)) as Board;
-    return NextResponse.json({ board });
+    const list = (await kanbansDB.get(params.listId)) as List;
+    return NextResponse.json({ list });
   } catch (error: unknown) {
     return NextResponse.json({ error: getMessage(error) }, { status: getStatus(error) });
   }
 }
 
-// ---------- PUT /api/boards/[id] ----------
+// ---------- PUT /api/lists/[listId] ----------
 export async function PUT(req: Request, { params }: Params) {
   try {
     const body = await req.json();
-    const parsed = updateBoardSchema.safeParse(body);
+    const parsed = updateListSchema.safeParse(body);
 
     if (!parsed.success) {
       return NextResponse.json({ errors: parsed.error.flatten() }, { status: 400 });
     }
 
-    const existing = (await kanbansDB.get(params.id)) as Board;
+    const existing = (await kanbansDB.get(params.listId)) as List;
 
-    const updated: Board = {
+    const updated: List = {
       ...existing,
       ...parsed.data,
     };
@@ -73,7 +73,7 @@ export async function PUT(req: Request, { params }: Params) {
     const result = await kanbansDB.insert(updated);
 
     return NextResponse.json({
-      message: 'Board updated',
+      message: 'List updated',
       id: result.id,
     });
   } catch (error: unknown) {
@@ -81,15 +81,15 @@ export async function PUT(req: Request, { params }: Params) {
   }
 }
 
-// ---------- DELETE /api/boards/[id] ----------
+// ---------- DELETE /api/lists/[listId] ----------
 export async function DELETE(_: Request, { params }: Params) {
   try {
-    const existing = (await kanbansDB.get(params.id)) as Board;
+    const existing = (await kanbansDB.get(params.listId)) as List;
 
     const result = await kanbansDB.destroy(existing._id, existing._rev!);
 
     return NextResponse.json({
-      message: 'Board deleted',
+      message: 'List deleted',
       id: result.id,
     });
   } catch (error: unknown) {

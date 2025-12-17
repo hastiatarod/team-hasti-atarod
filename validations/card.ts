@@ -3,8 +3,6 @@ import { z } from 'zod';
 
 export const createCardSchema = z.object({
   title: z.string().min(1, 'Title is required'),
-  boardId: z.string().min(1, 'boardId is required'),
-  listId: z.string().min(1, 'listId is required'),
 
   position: z.number().int().nonnegative().optional(),
 

@@ -1,29 +1,28 @@
-// app/api/lists/route.ts
-// GET (lists by board) + POST (create list)
+// app/api/boards/[boardId]/lists/route.ts
+// GET + POST lists for a board
 
 import { NextResponse } from 'next/server';
 import { kanbansDB } from '@/lib/couchdb';
 import type { List } from '@/types/list';
 import type { DocumentListResponse } from 'nano';
-import { randomUUID } from 'crypto';
+import { createList } from '@/lib/domain/lists';
 import { createListSchema } from '@/validations/list';
 
-// ---------- GET /api/lists----------
+interface Params {
+  params: { boardId: string };
+}
 
-export async function GET(req: Request) {
+// ---------- GET ----------
+
+export async function GET(_: Request, { params }: Params) {
   try {
-    const { searchParams } = new URL(req.url);
-    const boardId = searchParams.get('boardId');
-
-    if (!boardId) {
-      return NextResponse.json({ error: 'boardId is required' }, { status: 400 });
-    }
-    // nano returns unknown docs
     const raw = await kanbansDB.list({ include_docs: true });
     const data = raw as DocumentListResponse<List>;
+
     const lists = data.rows.flatMap((row) =>
-      row.doc?.type === 'list' && row.doc.boardId === boardId ? [row.doc] : [],
+      row.doc?.type === 'list' && row.doc.boardId === params.boardId ? [row.doc] : [],
     );
+
     return NextResponse.json({ lists });
   } catch (err) {
     console.error('GET Lists Error:', err);
@@ -31,9 +30,9 @@ export async function GET(req: Request) {
   }
 }
 
-// ---------- POST /api/lists ----------
+// ---------- POST  ----------
 
-export async function POST(req: Request) {
+export async function POST(req: Request, { params }: Params) {
   try {
     const body = await req.json();
     const parsed = createListSchema.safeParse(body);
@@ -42,17 +41,17 @@ export async function POST(req: Request) {
       return NextResponse.json({ errors: parsed.error.flatten() }, { status: 400 });
     }
 
-    const list: List = {
-      _id: `list:${randomUUID()}`,
-      type: 'list',
-      title: parsed.data.title,
-      boardId: parsed.data.boardId,
-      position: parsed.data.position ?? 0,
-      color: parsed.data.color,
-    };
-    const result = await kanbansDB.insert(list);
+    await createList(
+      {
+        title: parsed.data.title,
+        position: parsed.data.position ?? 0,
+        color: parsed.data.color,
+      },
 
-    return NextResponse.json({ message: 'List created', id: result.id }, { status: 201 });
+      params.boardId,
+    );
+
+    return NextResponse.json({ message: 'List created' }, { status: 201 });
   } catch (err) {
     console.error('POST List Error:', err);
     return NextResponse.json({ error: 'Failed to create list' }, { status: 500 });

@@ -1,4 +1,4 @@
-// app/test-boards/page.tsx
+// app/boards/page.tsx
 import Link from 'next/link';
 import { revalidatePath } from 'next/cache';
 import { kanbansDB } from '@/lib/couchdb';

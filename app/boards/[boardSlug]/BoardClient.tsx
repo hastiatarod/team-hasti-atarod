@@ -169,36 +169,58 @@ export default function BoardClient({
     listId: string,
     payload: Pick<Card, 'title' | 'description' | 'priority'>,
   ) => {
-    const card: Card = {
-      _id: `card:${crypto.randomUUID()}`,
-      type: 'card',
-      boardId: board._id,
-      listId,
-      title: payload.title,
-      description: payload.description,
-      priority: payload.priority ?? 'low',
-      position: cards.filter((c) => c.listId === listId).length,
-    };
-
     // Optimistic UI update
-    setCards((prev) => [...prev, card]);
-    await createCardAction(card, board.slug);
+    setCards((prev) => [
+      ...prev,
+      {
+        _id: `card:temp-${crypto.randomUUID()}`,
+        type: 'card',
+        boardId: board._id,
+        listId,
+        title: payload.title,
+        description: payload.description,
+        priority: payload.priority ?? 'low',
+        position: cards.filter((c) => c.listId === listId).length,
+      },
+    ]);
+
+    await createCardAction(
+      {
+        title: payload.title,
+        description: payload.description,
+        priority: payload.priority ?? 'low',
+        position: cards.filter((c) => c.listId === listId).length,
+      },
+      board._id,
+      listId,
+      board.slug,
+    );
   };
 
   // ---------------- Add List ----------------
   const addList = async (title: string) => {
-    const list: List = {
-      _id: `list:${crypto.randomUUID()}`,
-      type: 'list',
-      boardId: board._id,
-      title,
-      position: lists.length,
-      color: 'bg-slate-300',
-    };
-
     // Optimistic UI update
-    setLists((prev) => [...prev, list]);
-    await createListAction(list, board.slug);
+    setLists((prev) => [
+      ...prev,
+      {
+        _id: `list:temp-${crypto.randomUUID()}`,
+        type: 'list',
+        boardId: board._id,
+        title,
+        position: lists.length,
+        color: 'bg-slate-300',
+      },
+    ]);
+
+    await createListAction(
+      {
+        title,
+        position: lists.length,
+        color: 'bg-slate-300',
+      },
+      board._id,
+      board.slug,
+    );
   };
 
   // ---------------- Delete List ----------------
@@ -210,9 +232,13 @@ export default function BoardClient({
   };
   // ---------------- Delete Card ----------------
   const deleteCard = async (cardId: string) => {
+    const card = cards.find((c) => c._id === cardId);
+    if (!card) return;
+
     // Optimistic update
     setCards((prev) => prev.filter((c) => c._id !== cardId));
-    await deleteCardAction(board._id, cardId, board.slug);
+
+    await deleteCardAction(board._id, card.listId, cardId, board.slug);
   };
 
   return (

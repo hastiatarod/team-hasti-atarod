@@ -1,14 +1,17 @@
-// app/api/cards/[cardId]/route.ts
-// GET / PUT / DELETE for a single card
+// app/api/boards/[boardId]/lists/[listId]/route.ts
+// GET / PUT / DELETE a single list in a board
 
 import { NextResponse } from 'next/server';
 import { kanbansDB } from '@/lib/couchdb';
-import type { Card } from '@/types/card';
-import { updateCardSchema } from '@/validations/card';
+import type { List } from '@/types/list';
+import { updateListSchema } from '@/validations/list';
 
 // ---------- Types ----------
 interface Params {
-  params: { cardId: string };
+  params: {
+    boardId: string;
+    listId: string;
+  };
 }
 
 interface NanoError {
@@ -43,37 +46,43 @@ function getMessage(err: unknown): string {
   return 'Unknown error';
 }
 
-// ---------- GET /api/cards/[cardId] ----------
+// ---------- GET ----------
 export async function GET(_: Request, { params }: Params) {
   try {
-    const card = (await kanbansDB.get(params.cardId)) as Card;
-    return NextResponse.json({ card });
+    const list = (await kanbansDB.get(params.listId)) as List;
+    // The list belongs to the board in the URL
+    if (list.boardId !== params.boardId) {
+      return NextResponse.json({ error: 'List does not belong to this board' }, { status: 404 });
+    }
+    return NextResponse.json({ list });
   } catch (error: unknown) {
     return NextResponse.json({ error: getMessage(error) }, { status: getStatus(error) });
   }
 }
 
-// ---------- PUT /api/cards/[cardId] ----------
+// ---------- PUT ----------
 export async function PUT(req: Request, { params }: Params) {
   try {
     const body = await req.json();
-    const parsed = updateCardSchema.safeParse(body);
+    const parsed = updateListSchema.safeParse(body);
 
     if (!parsed.success) {
       return NextResponse.json({ errors: parsed.error.flatten() }, { status: 400 });
     }
 
-    const existing = (await kanbansDB.get(params.cardId)) as Card;
+    const existing = (await kanbansDB.get(params.listId)) as List;
+    //  Enforce board scope
+    if (existing.boardId !== params.boardId) {
+      return NextResponse.json({ error: 'List does not belong to this board' }, { status: 404 });
+    }
 
-    const updated: Card = {
+    const updated: List = {
       ...existing,
       ...parsed.data,
     };
-
     const result = await kanbansDB.insert(updated);
-
     return NextResponse.json({
-      message: 'Card updated',
+      message: 'List updated',
       id: result.id,
     });
   } catch (error: unknown) {
@@ -81,15 +90,20 @@ export async function PUT(req: Request, { params }: Params) {
   }
 }
 
-// ---------- DELETE /api/cards/[cardId] ----------
+// ---------- DELETE ----------
 export async function DELETE(_: Request, { params }: Params) {
   try {
-    const existing = (await kanbansDB.get(params.cardId)) as Card;
+    const existing = (await kanbansDB.get(params.listId)) as List;
+
+    // Enforce board scope
+    if (existing.boardId !== params.boardId) {
+      return NextResponse.json({ error: 'List does not belong to this board' }, { status: 404 });
+    }
 
     const result = await kanbansDB.destroy(existing._id, existing._rev!);
 
     return NextResponse.json({
-      message: 'Card deleted',
+      message: 'List deleted',
       id: result.id,
     });
   } catch (error: unknown) {

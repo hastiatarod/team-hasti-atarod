@@ -1,22 +1,14 @@
 // app/api/boards/route.ts
 // GET (board list) + POST (create board)
 import { NextResponse } from 'next/server';
-import { kanbansDB } from '@/lib/couchdb';
-import type { Board } from '@/types/board';
-import type { DocumentListResponse } from 'nano';
 import { createBoardSchema } from '@/validations/board';
-import { randomUUID } from 'crypto';
 import { generateSlug } from '@/lib/slug';
+import { findAllBoards, createBoardDoc } from '@/lib/repos/boards.repo';
 
+// ---------- GET ----------
 export async function GET() {
   try {
-    // nano: list() returns docs with type `unknown` instead of Board
-    const raw = await kanbansDB.list({ include_docs: true });
-
-    // Let TypeScript know that row.doc is a Board
-    const data = raw as DocumentListResponse<Board>;
-
-    const boards = data.rows.flatMap((row) => (row.doc ? [row.doc] : []));
+    const boards = await findAllBoards();
 
     return NextResponse.json({ boards });
   } catch (err) {
@@ -25,6 +17,7 @@ export async function GET() {
   }
 }
 
+// ---------- POST ----------
 export async function POST(req: Request) {
   try {
     const body = await req.json();
@@ -37,15 +30,11 @@ export async function POST(req: Request) {
     const { title, description } = parsed.data;
     const slug = generateSlug(title);
 
-    const board: Board = {
-      _id: `board:${randomUUID()}`,
-      type: 'board',
+    const result = await createBoardDoc({
       title,
       slug,
       description,
-    };
-
-    const result = await kanbansDB.insert(board);
+    });
 
     return NextResponse.json({ message: 'Board created', id: result.id }, { status: 201 });
   } catch (err) {

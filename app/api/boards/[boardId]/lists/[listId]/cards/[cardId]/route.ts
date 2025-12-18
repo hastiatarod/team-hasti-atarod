@@ -2,9 +2,9 @@
 // GET / PUT / DELETE for a single card
 
 import { NextResponse } from 'next/server';
-import { kanbansDB } from '@/lib/couchdb';
-import type { Card } from '@/types/card';
 import { updateCardSchema } from '@/validations/card';
+import { updateCard, deleteCard } from '@/lib/domain/cards';
+import { findCardById } from '@/lib/repos/cards.repo';
 
 // ---------- Types ----------
 interface Params {
@@ -15,53 +15,18 @@ interface Params {
   };
 }
 
-interface NanoError {
-  statusCode?: number;
-  error?: string;
-  message?: string;
-  reason?: string;
-}
-
-// ---------- Type Guards ----------
-function isNanoError(err: unknown): err is NanoError {
-  return (
-    typeof err === 'object' &&
-    err !== null &&
-    ('statusCode' in err || 'error' in err || 'reason' in err || 'message' in err)
-  );
-}
-
-function getStatus(err: unknown): number {
-  if (isNanoError(err) && typeof err.statusCode === 'number') {
-    return err.statusCode;
-  }
-  return 500;
-}
-
-function getMessage(err: unknown): string {
-  if (isNanoError(err)) {
-    if (typeof err.reason === 'string') return err.reason;
-    if (typeof err.message === 'string') return err.message;
-    if (typeof err.error === 'string') return err.error;
-  }
-  return 'Unknown error';
-}
-
 // ---------- GET ----------
 export async function GET(_: Request, { params }: Params) {
   try {
-    const card = (await kanbansDB.get(params.cardId)) as Card;
+    const card = await findCardById(params.cardId);
 
-    // Enforce board + list scope
-    if (card.boardId !== params.boardId || card.listId !== params.listId) {
-      return NextResponse.json(
-        { error: 'Card does not belong to this list or board' },
-        { status: 404 },
-      );
+    if (!card || card.boardId !== params.boardId || card.listId !== params.listId) {
+      return NextResponse.json({ error: 'Card not found in this list or board' }, { status: 404 });
     }
+
     return NextResponse.json({ card });
-  } catch (error: unknown) {
-    return NextResponse.json({ error: getMessage(error) }, { status: getStatus(error) });
+  } catch {
+    return NextResponse.json({ error: 'Failed to fetch card' }, { status: 500 });
   }
 }
 
@@ -74,52 +39,20 @@ export async function PUT(req: Request, { params }: Params) {
     if (!parsed.success) {
       return NextResponse.json({ errors: parsed.error.flatten() }, { status: 400 });
     }
+    await updateCard(params.cardId, parsed.data);
 
-    const existing = (await kanbansDB.get(params.cardId)) as Card;
-
-    // Enforce board + list scope
-    if (existing.boardId !== params.boardId || existing.listId !== params.listId) {
-      return NextResponse.json(
-        { error: 'Card does not belong to this list or board' },
-        { status: 404 },
-      );
-    }
-
-    const updated: Card = {
-      ...existing,
-      ...parsed.data,
-    };
-
-    const result = await kanbansDB.insert(updated);
-
-    return NextResponse.json({
-      message: 'Card updated',
-      id: result.id,
-    });
-  } catch (error: unknown) {
-    return NextResponse.json({ error: getMessage(error) }, { status: getStatus(error) });
+    return NextResponse.json({ message: 'Card updated' });
+  } catch {
+    return NextResponse.json({ error: 'Failed to update card' }, { status: 500 });
   }
 }
 
 // ---------- DELETE ----------
 export async function DELETE(_: Request, { params }: Params) {
   try {
-    const existing = (await kanbansDB.get(params.cardId)) as Card;
-    // Enforce board + list scope
-    if (existing.boardId !== params.boardId || existing.listId !== params.listId) {
-      return NextResponse.json(
-        { error: 'Card does not belong to this list or board' },
-        { status: 404 },
-      );
-    }
-
-    const result = await kanbansDB.destroy(existing._id, existing._rev!);
-
-    return NextResponse.json({
-      message: 'Card deleted',
-      id: result.id,
-    });
-  } catch (error: unknown) {
-    return NextResponse.json({ error: getMessage(error) }, { status: getStatus(error) });
+    await deleteCard(params.cardId);
+    return NextResponse.json({ message: 'Card deleted' });
+  } catch {
+    return NextResponse.json({ error: 'Failed to delete card' }, { status: 500 });
   }
 }

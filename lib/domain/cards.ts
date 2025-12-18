@@ -1,3 +1,5 @@
+// lib/domain/cards.ts
+
 import { kanbansDB } from '@/lib/couchdb';
 import type { Card } from '@/types/card';
 import { randomUUID } from 'crypto';
@@ -25,6 +27,12 @@ export async function createCard(
   };
 
   return kanbansDB.insert(card);
+}
+
+export async function updateCard(cardId: string, data: Partial<Card>) {
+  const existing = await kanbansDB.get(cardId);
+  const updated = { ...existing, ...data };
+  return kanbansDB.insert(updated);
 }
 
 export async function deleteCard(cardId: string) {

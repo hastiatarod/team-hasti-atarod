@@ -21,6 +21,11 @@ export async function createList(
 
   return kanbansDB.insert(list);
 }
+export async function updateList(listId: string, data: Partial<List>) {
+  const existing = await kanbansDB.get(listId);
+  const updated = { ...existing, ...data };
+  return kanbansDB.insert(updated);
+}
 
 export async function deleteList(listId: string) {
   const list = await kanbansDB.get(listId);

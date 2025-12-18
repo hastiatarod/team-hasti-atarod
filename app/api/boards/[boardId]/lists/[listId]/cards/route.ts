@@ -2,11 +2,9 @@
 // GET + POST cards for a list
 
 import { NextResponse } from 'next/server';
-import { kanbansDB } from '@/lib/couchdb';
-import type { Card } from '@/types/card';
-import type { DocumentListResponse } from 'nano';
 import { createCardSchema } from '@/validations/card';
 import { createCard } from '@/lib/domain/cards';
+import { findCardsByList } from '@/lib/repos/cards.repo';
 
 interface Params {
   params: {
@@ -18,20 +16,10 @@ interface Params {
 // ---------- GET ----------
 export async function GET(_: Request, { params }: Params) {
   try {
-    const raw = await kanbansDB.list({ include_docs: true });
-    const data = raw as DocumentListResponse<Card>;
-
-    const cards = data.rows.flatMap((row) =>
-      row.doc?.type === 'card' &&
-      row.doc.boardId === params.boardId &&
-      row.doc.listId === params.listId
-        ? [row.doc]
-        : [],
-    );
+    const cards = await findCardsByList(params.boardId, params.listId);
 
     return NextResponse.json({ cards });
-  } catch (err) {
-    console.error('GET Cards Error:', err);
+  } catch {
     return NextResponse.json({ error: 'Failed to fetch cards' }, { status: 500 });
   }
 }
@@ -58,8 +46,7 @@ export async function POST(req: Request, { params }: Params) {
     );
 
     return NextResponse.json({ message: 'Card created' }, { status: 201 });
-  } catch (err) {
-    console.error('POST Card Error:', err);
+  } catch {
     return NextResponse.json({ error: 'Failed to create card' }, { status: 500 });
   }
 }

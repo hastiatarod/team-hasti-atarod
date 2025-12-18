@@ -2,11 +2,9 @@
 // GET + POST lists for a board
 
 import { NextResponse } from 'next/server';
-import { kanbansDB } from '@/lib/couchdb';
-import type { List } from '@/types/list';
-import type { DocumentListResponse } from 'nano';
 import { createList } from '@/lib/domain/lists';
 import { createListSchema } from '@/validations/list';
+import { findListsByBoard } from '@/lib/repos/lists.repo';
 
 interface Params {
   params: { boardId: string };
@@ -16,12 +14,7 @@ interface Params {
 
 export async function GET(_: Request, { params }: Params) {
   try {
-    const raw = await kanbansDB.list({ include_docs: true });
-    const data = raw as DocumentListResponse<List>;
-
-    const lists = data.rows.flatMap((row) =>
-      row.doc?.type === 'list' && row.doc.boardId === params.boardId ? [row.doc] : [],
-    );
+    const lists = await findListsByBoard(params.boardId);
 
     return NextResponse.json({ lists });
   } catch (err) {

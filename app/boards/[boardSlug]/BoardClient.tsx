@@ -238,7 +238,7 @@ export default function BoardClient({
     // Optimistic update
     setCards((prev) => prev.filter((c) => c._id !== cardId));
 
-    await deleteCardAction(board._id, card.listId, cardId, board.slug);
+    await deleteCardAction(board._id, cardId, card.listId, board.slug);
   };
 
   return (

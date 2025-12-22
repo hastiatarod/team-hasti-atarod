@@ -1,7 +1,6 @@
 //app/boards/[boardSlug]/actions.ts
 'use server';
 
-import { revalidatePath } from 'next/cache';
 import { randomUUID } from 'crypto';
 import { kanbansDB } from '@/lib/couchdb';
 import { createCardSchema } from '@/validations/card';
@@ -34,7 +33,6 @@ export async function createCardAction(
     assignee: data.assignee,
   };
   await kanbansDB.insert(card);
-  revalidatePath(`/boards/${boardSlug}`);
 }
 
 // ---------------------- Create List ----------------------
@@ -51,7 +49,6 @@ export async function createListAction(payload: unknown, boardId: string, boardS
   };
 
   await kanbansDB.insert(list);
-  revalidatePath(`/boards/${boardSlug}`);
 }
 
 // ---------------------- Delete List ----------------------
@@ -64,13 +61,13 @@ export async function deleteListAction(boardId: string, listId: string, boardSlu
   }
 
   await kanbansDB.destroy(list._id, list._rev!);
-  revalidatePath(`/boards/${boardSlug}`);
 }
 /********************Add Delete cards belonging to this list (batch job)**************/
 
 // ---------------------- Delete Card ----------------------
 
 export async function deleteCardAction(
+  //***** to avoid positional arguments, use objects later
   boardId: string,
   cardId: string,
   listId: string,
@@ -83,5 +80,4 @@ export async function deleteCardAction(
     throw new Error('Card does not belong to this list or board');
   }
   await kanbansDB.destroy(card._id, card._rev!);
-  revalidatePath(`/boards/${boardSlug}`);
 }

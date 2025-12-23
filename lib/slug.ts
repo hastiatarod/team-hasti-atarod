@@ -1,3 +1,4 @@
+// lib\slug.ts
 import slugify from 'slugify';
 
 export function generateSlug(title: string): string {

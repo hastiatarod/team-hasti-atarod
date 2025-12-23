@@ -13,7 +13,13 @@ export async function GET() {
       selector: { type: 'board' },
     });
 
-    return NextResponse.json({ boards: result.docs as Board[] });
+    return NextResponse.json(
+      {
+        boards: result.docs as Board[],
+        total: result.docs.length,
+      },
+      { status: 200 },
+    );
   } catch (err) {
     console.error('GET Boards Error:', err);
     return NextResponse.json({ error: 'Failed to fetch boards' }, { status: 500 });

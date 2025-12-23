@@ -1,0 +1,2 @@
+# Install the REST Client plugin for VSCode to use this file.
+GET http://localhost:3000/api/boards

@@ -45,7 +45,6 @@ export async function POST(req: Request) {
       title,
       slug,
       description,
-      //ordering via DB
       createdAt: now,
       updatedAt: now,
     };

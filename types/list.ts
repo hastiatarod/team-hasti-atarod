@@ -10,7 +10,6 @@ export interface List extends MaybeDocument {
   boardId: string;
   title: string;
   color?: string;
-
   createdAt: string;
   updatedAt: string;
 }

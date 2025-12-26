@@ -9,7 +9,6 @@ export interface Board extends MaybeDocument {
   title: string; // board name/title
   slug: string;
   description?: string; // optional board description
-
   createdAt: string;
   updatedAt: string;
 }

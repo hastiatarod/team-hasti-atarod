@@ -5,6 +5,7 @@ import { NextResponse } from 'next/server';
 import { kanbansDB } from '@/lib/couchdb';
 import type { Card } from '@/types/card';
 import { createCardSchema } from '@/validations/card';
+import { id } from 'zod/v4/locales';
 
 interface RouteContext {
   params: Promise<{
@@ -65,9 +66,9 @@ export async function POST(req: Request, props: RouteContext) {
       updatedAt: now,
     };
 
-    await kanbansDB.insert(card);
+    const result = await kanbansDB.insert(card);
 
-    return NextResponse.json({ message: 'Card created' }, { status: 201 });
+    return NextResponse.json({ message: 'Card created', id: result.id }, { status: 201 });
   } catch (err) {
     console.error('POST Card Error:', err);
     return NextResponse.json({ error: 'Failed to create card' }, { status: 500 });

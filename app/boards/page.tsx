@@ -3,7 +3,6 @@ import Link from 'next/link';
 import { revalidatePath } from 'next/cache';
 import { kanbansDB } from '@/lib/couchdb';
 import { generateSlug } from '@/lib/slug';
-import { randomUUID } from 'crypto';
 import type { Board } from '@/types/board';
 import { createBoardSchema } from '@/validations/board';
 
@@ -38,7 +37,7 @@ async function createBoard(formData: FormData) {
   });
   const now = new Date().toISOString();
   const board: Board = {
-    _id: `board:${randomUUID()}`,
+    _id: `board:${crypto.randomUUID()}`,
     type: 'board',
     title: data.title.trim(),
     slug: generateSlug(data.title),

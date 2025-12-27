@@ -5,7 +5,7 @@ import { NextResponse } from 'next/server';
 import { kanbansDB } from '@/lib/couchdb';
 import type { Card } from '@/types/card';
 import { createCardSchema } from '@/validations/card';
-import { id } from 'zod/v4/locales';
+import { randomUUID } from 'crypto';
 
 interface RouteContext {
   params: Promise<{
@@ -54,7 +54,7 @@ export async function POST(req: Request, props: RouteContext) {
 
     const now = new Date().toISOString();
     const card: Card = {
-      _id: `card:${crypto.randomUUID()}`,
+      _id: `card:${randomUUID()}`,
       type: 'card',
       boardId: boardId,
       listId: listId,
